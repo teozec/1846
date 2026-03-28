@@ -15,7 +15,7 @@ export type GameConfig = {
 
 type FloatedInfo = {
     state: "floated";
-    value: number;
+    valueIndex: number;
     shares: number;
     president: string;
 }

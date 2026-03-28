@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NumberInput } from "../components/NumberInput";
 import { DividendOption } from "../components/DividendOption";
 import { Link } from "react-router";
@@ -12,12 +12,27 @@ type OperatingRoundProps = {
     dispatch: React.Dispatch<GameAction>;
 };
 
-export function OperatingRound({ state: { players, companies } }: OperatingRoundProps) {
+export function OperatingRound({ state: { players, companies }, dispatch }: OperatingRoundProps) {
+    if (companies.every(c => c.state !== "floated")) {
+        return (
+            <>
+                <h1>Operating Round</h1>
+                <p>No companies have floated yet. Please go to the stock round.</p>
+                <Link to={ROUTES.STOCK}>Go to Stock Round</Link>
+            </>
+        )
+    }
+
     const [revenue, setRevenue] = useState(0);
     const [selectedCompany, setSelectedCompany] = useState(0);
 
-    const companyName = companies[selectedCompany]?.name;
+    const floatedCompanies = companies.filter(c => c.state === "floated");
+    const companyName = floatedCompanies[selectedCompany].name;
     const sharesForSelected = players.map(player => player.shares[companyName] ?? 0);
+    const companyShares = floatedCompanies[selectedCompany].shares;
+
+    const [localShares, setLocalShares] = useState(companyShares);
+    useEffect(() => { setLocalShares(companyShares); }, [selectedCompany]);
 
     return (
         <>
@@ -28,17 +43,26 @@ export function OperatingRound({ state: { players, companies } }: OperatingRound
             <div>
                 <label htmlFor="company-select">Company</label>
                 <select id="company-select" value={selectedCompany} onChange={(e) => setSelectedCompany(Number(e.target.value))}>
-                    {companies.map((c, i) => <option key={i} value={i}>{c.name}</option>)}
+                    {floatedCompanies.map((c, i) => <option key={i} value={i}>{c.name}</option>)}
                 </select>
             </div>
 
             <div>
+                <p>President: {floatedCompanies[selectedCompany].president}</p>
+                <div>
+                    <label htmlFor="company-shares">Company shares: </label>
+                    <NumberInput id="company-shares" value={localShares} onChange={setLocalShares} />
+                    <button
+                        onClick={() => dispatch({ type: "UPDATE_COMPANY_SHARES", companyName, shares: localShares })}
+                        disabled={localShares === companyShares}
+                    >Save</button>
+                </div>
                 <label htmlFor="revenue">Revenue</label>
                 <NumberInput id="revenue" value={revenue} onChange={setRevenue} />
             </div>
 
             <>
-                {calculateDividendOptions(sharesForSelected, revenue).map((option, index) => (
+                {calculateDividendOptions(sharesForSelected, localShares, revenue).map((option, index) => (
                     <DividendOption
                         players={players.map(p => p.name)}
                         key={index}
