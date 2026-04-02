@@ -52,7 +52,7 @@ export function Setup({ dispatch }: SetupProps) {
             <h1>New Game</h1>
 
             <label htmlFor="num-players">Number of Players</label>
-            <NumberInput id="num-players" value={numPlayers} onChange={handleNumPlayersChange} />
+            <NumberInput id="num-players" value={numPlayers} onChange={handleNumPlayersChange} min={3} max={5} />
 
             {[...Array(numPlayers)].map((_, index) => (
                 <div key={index}>

@@ -18,7 +18,9 @@ export function StockRound({ state: { companies, players }, dispatch }: StockRou
     const [localCompanies, setLocalCompanies] = useState<Company[]>(() => companies)
     const navigate = useNavigate();
 
-    function updateShare(playerName: string, companyName: CompanyName, value: number) {
+    const localPlayers = players.map(player => ({ ...player, shares: playerShares[player.name] }));
+
+    function updatePlayerShares(playerName: string, companyName: CompanyName, value: number) {
         setPlayerShares(prev => ({
             ...prev,
             [playerName]: {
@@ -26,8 +28,12 @@ export function StockRound({ state: { companies, players }, dispatch }: StockRou
                 [companyName]: value,
             }
         }));
-    }
 
+        const company = localCompanies.find(c => c.name === companyName);
+        if (company?.state === "floated" && company.shares > 0) {
+            updateCompanyShares(companyName, company.shares - 1);
+        }
+    }
 
     function updateCompanyState(companyName: CompanyName, state: "floated" | "not_floated" | "delisted") {
         setLocalCompanies(prev => prev.map(c => {
@@ -60,6 +66,12 @@ export function StockRound({ state: { companies, players }, dispatch }: StockRou
         navigate(ROUTES.OPERATING);
     }
 
+    function getTotalPlayerShares(companyName: CompanyName) {
+        return players.reduce((sum, player) => sum + (playerShares[player.name]?.[companyName] ?? 0), 0);
+    }
+
+    console.log(getTotalPlayerShares("Grand Trunk"))
+
     return (
         <>
             <h1>Stock Round</h1>
@@ -75,7 +87,9 @@ export function StockRound({ state: { companies, players }, dispatch }: StockRou
                             <NumberInput
                                 id={`${player.name}-${company.name}`}
                                 value={playerShares[player.name]?.[company.name] ?? 0}
-                                onChange={(value) => updateShare(player.name, company.name, value)}
+                                onChange={(value) => updatePlayerShares(player.name, company.name, value)}
+                                min={0}
+                                max={10}
                             />
                         </div>
                     ))}
@@ -85,7 +99,7 @@ export function StockRound({ state: { companies, players }, dispatch }: StockRou
             <section>
                 <h2>Companies</h2>
                 {localCompanies.map((company) => (
-                    <div key={company.name} style={{ marginBottom: "0.5rem", padding: "0.5rem", border: "1px solid #ccc" }}>
+                    <div key={company.name}>
                         <span>{company.name} - {company.state === "floated" ? "Floated" : company.state === "delisted" ? "Delisted" : "Non-Floated"}</span>
                         {company.state === "floated" && (
                             <>
@@ -113,6 +127,8 @@ export function StockRound({ state: { companies, players }, dispatch }: StockRou
                                     id={`${company.name}-shares`}
                                     value={company.shares}
                                     onChange={(value) => updateCompanyShares(company.name, value)}
+                                    min={0}
+                                    max={10 - getTotalPlayerShares(company.name)}
                                 />
                                 <button onClick={() => updateCompanyState(company.name, "not_floated")}>Unfloat</button>
                                 <button onClick={() => updateCompanyState(company.name, "delisted")}>Delist</button>
@@ -135,7 +151,7 @@ export function StockRound({ state: { companies, players }, dispatch }: StockRou
                 <h2>Stock Market</h2>
 
                 {localCompanies.filter(company => company.state === "floated").map((company) => (
-                    <div key={company.name}>{company.name}: {getStockMarketShares({ companies: localCompanies, players })[company.name]}</div>
+                    <div key={company.name}>{company.name}: {getStockMarketShares({ companies: localCompanies, players: localPlayers })[company.name]}</div>
                 ))}
 
             </section>

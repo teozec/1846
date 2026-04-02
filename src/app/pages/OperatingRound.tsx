@@ -34,6 +34,8 @@ export function OperatingRound({ state: { players, companies }, dispatch }: Oper
 
     const [localShares, setLocalShares] = useState(companyShares);
     const localCompanies = companies.map(c => c.name === companyName ? { ...c, shares: localShares } : c)
+    const stockMarketShares = getStockMarketShares({ companies: localCompanies, players })[companyName];
+    const nonPlayerShares = localShares + stockMarketShares
 
     useEffect(() => { setLocalShares(companyShares); }, [selectedCompany]);
 
@@ -54,13 +56,13 @@ export function OperatingRound({ state: { players, companies }, dispatch }: Oper
                 <p>President: {floatedCompanies[selectedCompany].president}</p>
                 <div>
                     <label htmlFor="company-shares">Company shares: </label>
-                    <NumberInput id="company-shares" value={localShares} onChange={setLocalShares} />
+                    <NumberInput id="company-shares" value={localShares} onChange={setLocalShares} min={0} max={nonPlayerShares} />
                     <button
                         onClick={() => dispatch({ type: "UPDATE_COMPANY_SHARES", companyName, shares: localShares })}
                         disabled={localShares === companyShares}
                     >Save</button>
                 </div>
-                <div>Stock market shares: {getStockMarketShares({ companies: localCompanies, players })[companyName]}</div>
+                <div>Stock market shares: {stockMarketShares}</div>
                 <label htmlFor="revenue">Revenue</label>
                 <NumberInput id="revenue" value={revenue} onChange={setRevenue} />
             </div>
