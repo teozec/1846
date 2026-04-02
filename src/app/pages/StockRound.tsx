@@ -5,6 +5,7 @@ import { useState } from 'react';
 import type { Company, GameState, CompanyName } from "../../game/types";
 import type { GameAction } from "../reducers/gameReducer";
 import { STOCK_PRICE_CHART } from "../../game/constants";
+import { getStockMarketShares } from "../../game/stock-round";
 
 
 type StockRoundProps = {
@@ -128,6 +129,15 @@ export function StockRound({ state: { companies, players }, dispatch }: StockRou
                         )}
                     </div>
                 ))}
+            </section>
+
+            <section>
+                <h2>Stock Market</h2>
+
+                {localCompanies.filter(company => company.state === "floated").map((company) => (
+                    <div key={company.name}>{company.name}: {getStockMarketShares({ companies: localCompanies, players })[company.name]}</div>
+                ))}
+
             </section>
 
             <button onClick={handleEndStockRound}>End Stock Round</button>

@@ -6,6 +6,7 @@ import { ROUTES } from "../routes";
 import { calculateDividendOptions } from "../../game/operating-round";
 import type { GameState } from "../../game/types";
 import type { GameAction } from "../reducers/gameReducer";
+import { getStockMarketShares } from "../../game/stock-round";
 
 type OperatingRoundProps = {
     state: GameState;
@@ -32,6 +33,8 @@ export function OperatingRound({ state: { players, companies }, dispatch }: Oper
     const companyShares = floatedCompanies[selectedCompany].shares;
 
     const [localShares, setLocalShares] = useState(companyShares);
+    const localCompanies = companies.map(c => c.name === companyName ? { ...c, shares: localShares } : c)
+
     useEffect(() => { setLocalShares(companyShares); }, [selectedCompany]);
 
     return (
@@ -57,6 +60,7 @@ export function OperatingRound({ state: { players, companies }, dispatch }: Oper
                         disabled={localShares === companyShares}
                     >Save</button>
                 </div>
+                <div>Stock market shares: {getStockMarketShares({ companies: localCompanies, players })[companyName]}</div>
                 <label htmlFor="revenue">Revenue</label>
                 <NumberInput id="revenue" value={revenue} onChange={setRevenue} />
             </div>
