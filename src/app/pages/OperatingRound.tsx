@@ -67,7 +67,7 @@ export function OperatingRound({ state: { players, companies }, dispatch }: Oper
                 <NumberInput id="revenue" value={revenue} onChange={setRevenue} />
             </div>
 
-            <>
+            <div style={{ display: "flex", gap: "1rem" }}>
                 {calculateDividendOptions(sharesForSelected, localShares, revenue).map((option, index) => (
                     <DividendOption
                         players={players.map(p => p.name)}
@@ -75,7 +75,7 @@ export function OperatingRound({ state: { players, companies }, dispatch }: Oper
                         option={option}
                     />
                 ))}
-            </>
+            </div>
         </>
     )
 }
