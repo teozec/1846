@@ -19,9 +19,9 @@ export function calculateDividendOptions(playerShares: number[], companyShares: 
         {
             label: "Pay half dividends",
             perShare: Math.floor(revenue * 0.05),
-            witheld: Math.ceil(revenue * 0.05) * 10,
-            company: Math.ceil(revenue * 0.05) * 10 + companyShares * Math.floor(revenue * 0.05),
-            playerAmounts: playerShares.map(shares => shares * Math.floor(revenue * 0.05)),
+            witheld: Math.floor(revenue * 0.05) * 10,
+            company: Math.floor(revenue * 0.05) * 10 + companyShares * Math.ceil(revenue * 0.05),
+            playerAmounts: playerShares.map(shares => shares * Math.ceil(revenue * 0.05)),
         },
         {
             label: "Pay no dividends",
