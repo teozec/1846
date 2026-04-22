@@ -7,6 +7,7 @@ import { calculateDividendOptions } from "../../game/operating-round";
 import type { GameState } from "../../game/types";
 import type { GameAction } from "../reducers/gameReducer";
 import { getStockMarketShares } from "../../game/stock-round";
+import { STOCK_PRICE_CHART } from "../../game/constants";
 
 type OperatingRoundProps = {
     state: GameState;
@@ -63,12 +64,13 @@ export function OperatingRound({ state: { players, companies }, dispatch }: Oper
                     >Save</button>
                 </div>
                 <div>Stock market shares: {stockMarketShares}</div>
+                <div>Share value: {STOCK_PRICE_CHART[floatedCompanies[selectedCompany].valueIndex]}</div>
                 <label htmlFor="revenue">Revenue</label>
                 <NumberInput id="revenue" value={revenue} onChange={setRevenue} />
             </div>
 
             <div style={{ display: "flex", gap: "1rem" }}>
-                {calculateDividendOptions(sharesForSelected, localShares, revenue).map((option, index) => (
+                {calculateDividendOptions(sharesForSelected, localShares, floatedCompanies[selectedCompany].valueIndex, revenue).map((option, index) => (
                     <DividendOption
                         players={players.map(p => p.name)}
                         key={index}
